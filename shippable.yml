@@ -3,27 +3,44 @@ language: node_js
 node_js:
   - 7.4.0
 
+env:
+  global:
+    # AWS_SANDBOX_KEY_ID, AWS_SANDBOX_KEY, AWS_STAGING_KEY_ID, AWS_STAGING_KEY
+    - secure: P6Nel0E9JIMff+mOno0U3bkH/JlRcevYG7wtI+u66wriAiVWRZCHEtoY3DW89Y2mVE20ojg3tZ8UUAhKOByuIKZo5jUzrVbsvgadClED06MFYg46jOpMuihsjYCHzgeasF81tzkoRBmkcNAtpsaQ4H1q/ZQQ8RbQ7pLcgGHUnFrmfpj/QEyefdFeS/GL9P3JNZ9QMwNtt8wJOYjM2vBm13RZ0QrCpxiSTHHrutag4+4hjUEYHydBC0nTltxAFbOunNNiWUosqwpBo7R7UmIx7mptR+8Obqc7sWqNn+bzFGDa6OVW9gHYNcPNLQXlGYt68v7wmpdYKTtTHwEJpIMy8Q==
+
+install:
+  - sudo apt-get install zip
+
 build:
 
   # http://docs.shippable.com/ci/shippableyml/#ci
   ci:
     # npm mirrors can sometimes be flacky, better to use shippable_retry
     # http://docs.shippable.com/ci/advancedOptions/retry/
-    - shippable_retry npm install
+    - npm install
     - npm test
     - npm run build
 
+  post_ci:
+    - aws configure set preview.cloudfront true
+    - aws configure set region eu-west-1
+    - aws configure set aws_access_key_id $AWS_STAGING_KEY_ID
+    - aws configure set aws_secret_access_key $AWS_STAGING_KEY
+    # Deploy the app to sandbox.acebusters.com and publish the app zip to S3 for later staging promotion
+    - if [ "$BRANCH" == "develop" ] && [ "$IS_PULL_REQUEST" == "false" ]; then npm run deploy:sandbox && npm run deploy:sandbox:publish-artifact; fi
+    # Deploy the app to staging.acebusters.com and deploy backend from sandbox to staging lambdas
+    - if [[ "$BRANCH" == release/* ]]; then ./scripts/deploy_staging.sh; fi
 
-# Integrations are used to connect external resources to CI
-# http://docs.shippable.com/integrations/overview/
-integrations:
-
-  # http://docs.shippable.com/ci/shippableyml/#notifications
   notifications:
-  # turning of email for PR builds, get notified only on failure and change in status
-  # http://docs.shippable.com/integrations/notifications/email/
-    - integrationName: email
-      type: email
+    - integrationName: slack_chainfish
+      type: slack
+      recipients:
+        - "#ci"
+      branches:
+        only:
+          - master
+          - develop
+          - release/*
       on_success: change
       on_failure: always
-      on_pull_request: never
+      on_start: never
