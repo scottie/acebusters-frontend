@@ -257,7 +257,7 @@
     "react": "^15.6.2",
     "react-addons-css-transition-group": "^15.6.0",
     "react-addons-transition-group": "^15.6.2",
-    "react-dom": "^15.6.2",
+    "react-dom": "^16.0.1",
     "react-ga": "^2.2.0",
     "react-intl": "^2.4.0",
     "react-onclickoutside": "^6.1.1",
