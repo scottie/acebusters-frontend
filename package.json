@@ -237,7 +237,7 @@
     "cross-env": "5.0.0",
     "ethereumjs-util": "^5.1.0",
     "ethers": "^2.1.2",
-    "express": "4.15.3",
+    "express": "4.15.5",
     "fontfaceobserver": "2.0.9",
     "immutable": "3.8.1",
     "invariant": "2.2.2",
