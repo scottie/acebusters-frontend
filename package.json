@@ -245,7 +245,7 @@
     "keccak": "^1.3.0",
     "localStorage": "1.0.3",
     "lodash": "4.17.2",
-    "minimist": "1.2.0",
+    "minimist": "1.2.2",
     "poker-helper": "^7.1.0",
     "prismic-reactjs": "^0.1.0",
     "prop-types": "^15.5.10",
